@@ -1,0 +1,50 @@
+name: Create PR on Branch Push
+
+on:
+  push:
+    branches-ignore:
+      - 'main'  # Trigger on all branches except main (adjust to 'master' if that's your default branch)
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Pull Request
+        run: |
+          # Extract branch name from GITHUB_REF (format: refs/heads/branch-name)
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          BASE="main"
+
+          # Check if PR already exists
+          echo "Checking for existing PR from branch: $BRANCH"
+          EXISTING_PR=$(gh pr list --head "$BRANCH" --base "$BASE" --state open --json number,url --jq '.[0]' || echo "")
+
+          # Create new PR if it doesn't exist
+          if [ -z "$EXISTING_PR" ] || [ "$EXISTING_PR" == "null" ]; then
+            echo "Creating new pull request..."
+            gh pr create \
+              --title "Auto PR: $BRANCH" \
+              --base "$BASE" \
+              --head "$BRANCH" \
+              --body "This PR was automatically created for branch '$BRANCH'.
+
+          **Branch:** $BRANCH
+          **Author:** ${{ github.actor }}
+          **Commit:** ${{ github.sha }}" \
+              --draft=false
+
+            echo "Pull request created successfully"
+          else
+            PR_URL=$(echo "$EXISTING_PR" | jq -r '.url')
+            echo "PR already exists: $PR_URL"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

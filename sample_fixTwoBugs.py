@@ -3,7 +3,6 @@ def process_transactions(balance, transactions):
     for t in transactions:
         action = t["action"]
         amount = t["amount"]
-        # Bug 3 Fix: Type check for amount
         try:
             amount = float(amount)
         except (ValueError, TypeError):
@@ -13,7 +12,6 @@ def process_transactions(balance, transactions):
             balance += amount
             history.append(f"Deposited {amount}, balance: {balance}")
         elif action == "withdraw":
-            # Bug 2 Fix: Prevent overdraft
             if amount > balance:
                 history.append("Error: Insufficient funds for withdrawal")
                 continue

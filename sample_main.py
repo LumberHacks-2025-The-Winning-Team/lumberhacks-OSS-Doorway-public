@@ -3,9 +3,6 @@ def process_transactions(balance, transactions):
     for t in transactions:
         action = t["action"]
         amount = t["amount"]
-        # Bug 1: No rejection of negative amounts
-        # Bug 2: No check for insufficient funds on withdrawal
-        # Bug 3: No type check for amount
         if action == "deposit":
             balance += amount
             history.append(f"Deposited {amount}, balance: {balance}")

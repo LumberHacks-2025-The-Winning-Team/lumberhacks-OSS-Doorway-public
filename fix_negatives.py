@@ -1,11 +1,10 @@
 def process_transactions(balance, transactions):
     history = []
     for t in transactions:
-        action = t["action"]
-        amount = t["amount"]
-        # Fix for Bug 1: Reject negative amounts
+        action = t.get("action")
+        amount = t.get("amount")
         if isinstance(amount, (int, float)) and amount < 0:
-            history.append(f"Error: Negative amount {amount} rejected")
+            history.append(f"Error: Negative amount {amount} not allowed")
             continue
         if action == "deposit":
             balance += amount
@@ -13,6 +12,8 @@ def process_transactions(balance, transactions):
         elif action == "withdraw":
             balance -= amount
             history.append(f"Withdrew {amount}, balance: {balance}")
+        elif action == "transfer":
+            history.append(f"Transferred {amount}")
         else:
             history.append("Unknown action")
     return balance, history
